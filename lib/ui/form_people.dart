@@ -1,6 +1,11 @@
 import 'dart:io';
+import 'package:birthday_data/ui/home_screen.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+
+import '../model/User.dart';
 
 class AddPeopleBirthday extends StatefulWidget {
   const AddPeopleBirthday({Key? key}) : super(key: key);
@@ -14,16 +19,18 @@ class _AddPeopleBirthdayState extends State<AddPeopleBirthday> {
   File? _image;
 
   final _nameController = TextEditingController();
-  final _data = TextEditingController();
+  final _dataController = TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
 
+  UserModel newUser = UserModel();
 
   void _pickImage() async {
     final XFile? file = await _picker.pickImage(source: ImageSource.gallery);
 
     setState(() {
       _image = File(file!.path);
+      newUser.photoURLModel = file.path;
     });
     // if (mounted && file != null) {
     //   Navigator.push(
@@ -58,9 +65,9 @@ class _AddPeopleBirthdayState extends State<AddPeopleBirthday> {
 
   @override
   void dispose() {
+    super.dispose();
     _nameController.dispose();
-    _data.dispose();
-
+    _dataController.dispose();
   }
 
   @override
@@ -69,45 +76,75 @@ class _AddPeopleBirthdayState extends State<AddPeopleBirthday> {
       appBar: AppBar(
         title: const Text("Добавление именинника"),
         centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: () {
+              _formKey.currentState?.save(); // null check
+              Provider.of<UserModel>(context, listen: false).updateModel(newUser.nameModel, newUser.dataModel, newUser.photoURLModel);
+              // _formKey.currentState?.reset();
+              Navigator.pop(context,
+                  MaterialPageRoute(builder: (context) => const HomeScreen()));
+
+            },
+            icon: Icon(Icons.check),
+          )
+        ],
       ),
       body: ListView(
         padding: EdgeInsets.all(16),
         children: [
           buildImagePicker(context),
           Form(
-            child: TextFormField(
-              decoration: InputDecoration(
-                labelText: 'ФИО именинника',
-                prefixIcon: Icon(Icons.person),
-                suffixIcon: GestureDetector(
-                  onTap: () {
-                    _nameController.clear();
+            key: _formKey,
+            child: Column(
+              children: [
+                TextFormField(
+                  controller: _nameController,
+                  decoration: InputDecoration(
+                      labelText: 'ФИО именинника',
+                      prefixIcon: Icon(Icons.person),
+                      suffixIcon: GestureDetector(
+                        onTap: () {
+                          _nameController.clear();
+                        },
+                        child: const Icon(
+                          Icons.cancel,
+                        ),
+                      )),
+                  onSaved: (value) => newUser.nameModel = value!,
+                ),
+                TextFormField(
+                  controller: _dataController,
+                  decoration: InputDecoration(
+                      labelText: 'Дата рождения',
+                      prefixIcon: Icon(Icons.calendar_today),
+                      suffixIcon: GestureDetector(
+                        onTap: () {
+                          _dataController.clear();
+                        },
+                        child: const Icon(
+                          Icons.cancel,
+                        ),
+                      )),
+                  onTap: () async {
+                    FocusManager.instance.primaryFocus?.unfocus();
+                    DateTime? pickedDate = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(1920),
+                        lastDate: DateTime(2050));
+                    if (pickedDate != null) {
+                      setState(() {
+                        _dataController.text =
+                            DateFormat('dd-MM-yyyy').format(pickedDate);
+                      });
+                    }
                   },
-                  child: const Icon(
-                    Icons.delete_outline,
-                  ),
-                )
-              ),
+                  onSaved: (value) => newUser.dataModel = value!,
+                ),
+              ],
             ),
           ),
-          Form(
-            child: TextFormField(
-              decoration: InputDecoration(
-                labelText: 'ФИО именинника',
-                prefixIcon: Icon(Icons.person),
-                suffixIcon: GestureDetector(
-                  onTap: () {
-                    _nameController.clear();
-                  },
-                  child: const Icon(
-                    Icons.delete_outline,
-                  ),
-                )
-              ),
-            ),
-          ),
-
-
         ],
       ),
     );
@@ -115,52 +152,52 @@ class _AddPeopleBirthdayState extends State<AddPeopleBirthday> {
 
   Column buildImagePicker(BuildContext context) {
     return Column(
-          children: [
-            const SizedBox(
-              height: 32,
-            ),
-            Center(
-              child: GestureDetector(
-                onTap: () {
-                  _showPicker(context);
-                },
-                child: CircleAvatar(
-                  radius: 55,
-                  backgroundColor: Color(0xffFDCF09),
-                  child: _image != null
-                      ? Image.file(
-                    _image!,
-                    width: 150,
-                    height: 150,
-                    fit: BoxFit.cover,
-                  )
-                      : Container(
-                    decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(50)),
-                    width: 100,
-                    height: 100,
-                    child: Icon(
-                      Icons.camera_alt,
-                      color: Colors.grey[800],
+      children: [
+        const SizedBox(
+          height: 32,
+        ),
+        Center(
+          child: GestureDetector(
+            onTap: () {
+              _showPicker(context);
+            },
+            child: CircleAvatar(
+              radius: 55,
+              backgroundColor: Color(0xffFDCF09),
+              child: _image != null
+                  ? Image.file(
+                      _image!,
+                      width: 150,
+                      height: 150,
+                      fit: BoxFit.cover,
+                    )
+                  : Container(
+                      decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(50)),
+                      width: 100,
+                      height: 100,
+                      child: Icon(
+                        Icons.camera_alt,
+                        color: Colors.grey[800],
+                      ),
                     ),
-                  ),
-                ),
-              ),
             ),
-            const SizedBox(
-              height: 32,
-            ),
-            ElevatedButton(
-              child: Text('Добавить фото'),
-              onPressed: () {
-                _showPicker(context);
-              },
-            ),
-            const SizedBox(
-              height: 32,
-            ),
-          ],
-        );
+          ),
+        ),
+        const SizedBox(
+          height: 32,
+        ),
+        ElevatedButton(
+          child: Text('Добавить фото'),
+          onPressed: () {
+            _showPicker(context);
+          },
+        ),
+        const SizedBox(
+          height: 32,
+        ),
+      ],
+    );
   }
 }

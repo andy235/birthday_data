@@ -1,4 +1,7 @@
+import 'package:birthday_data/model/User.dart';
+import 'package:birthday_data/ui/form_people.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'ui/home_screen.dart';
 
@@ -12,13 +15,16 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Flutter Bithday data app',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return ChangeNotifierProvider(
+      create: (context) => UserModel(),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Flutter Bithday data app',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: const HomeScreen(),
       ),
-      home: const HomeScreen(),
     );
   }
 }

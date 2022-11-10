@@ -1,22 +1,36 @@
+import 'dart:io';
+
+import 'package:birthday_data/model/User.dart';
 import 'package:flutter/material.dart';
 
-Card buildCard(){
-  var name = "Артем";
-  var data = "19.10.1999";
-  // late var image;
+Card buildCard(UserModel userModel){
+
+  // List<String> nameCardList = [];
+  // List<String> dataCardList = [];
+  // List<String> photoURlCardList = [];
+  //
+  // String nameCardModel = userModel.nameModel;
+  // String dataCardModel = userModel.dataModel;
+  // String photoURLCardModel = userModel.photoURLModel;
+  //
+  // nameCardList.add(nameCardModel);
+  // dataCardList.add(dataCardModel);
+  // photoURlCardList.add(photoURLCardModel);
+
+
 
   return Card(
     child: Column(
       children: [
         Container(
           height: 200,
-          child: Image.asset('assets/images/img.jpg'),
+          child: Image.file(File(userModel.photoURLModel)),
         ),
         Container(
-          child: Text(name),
+          child: Text(userModel.nameModel),
         ),
         Container(
-          child: Text(data),
+          child: Text(userModel.dataModel),
         )
       ],
     ),
