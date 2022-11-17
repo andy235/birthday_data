@@ -1,7 +1,11 @@
+
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../model/User.dart';
+import '../provider/list_provider.dart';
 import '../widgets/card_bilder.dart';
 import 'form_people.dart';
 
@@ -13,26 +17,25 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<UserModel> listOfCard = [];
+  // List<UserModel> listOfCard = [];
   int _selectedIndex = 0;
 
 
-  void addCardToListMethod(UserModel userCard) {
-    setState(() {
-      listOfCard.add(userCard);
-    });
-  }
+  // void addCardToListMethod(UserModel userCard) {
+  //   setState(() {
+  //     listOfCard.add(userCard);
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
-    final newUserModel = context.read<UserModel>();
-    String getName = Provider.of<UserModel>(context).nameModel.toString();
+    final newUserModel = Provider.of<ListProvider>(context);
+    String getName = newUserModel.listOfCardsProvider[newUserModel.listOfCardsProvider.length - 2];
+    // newUserModel.addCardToList(newUserModel);
     // String getDate = Provider.of<UserModel>(context).dataModel.toString();
     // String getPhotoURL = Provider.of<UserModel>(context).photoURLModel.toString();
 
-    if ( getName != 'init') {
-      addCardToListMethod(newUserModel);
-    } else {
+    if ( getName == 'init' ) {
       return Scaffold(
         appBar: AppBar(
           title: Text('Календарь дней рождений'),
@@ -49,10 +52,10 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
           leading: IconButton(
             onPressed: () {
-              print(listOfCard);
-              print(listOfCard[0].nameModel);
-              print(listOfCard[1].nameModel);
-              print(listOfCard[2].nameModel);
+              print(newUserModel.listOfCardsProvider);
+              print(newUserModel.listOfCardsProvider[0][0]);
+              print(newUserModel.listOfCardsProvider[1][0]);
+              print(newUserModel.listOfCardsProvider[2][0]);
             },
             icon: Icon(Icons.search_rounded),
           ),
@@ -66,12 +69,27 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
-    List<Widget> _cards = <Widget>[
+    List<Widget> cards = <Widget>[
       Scaffold(
         body: ListView.builder(
-          itemCount: listOfCard.length,
+          itemCount: newUserModel.listOfCardsProvider.length,
           itemBuilder: (context, index) {
-            return buildCard(listOfCard[index])
+            return Card(
+              child: Column(
+                children: [
+                  Container(
+                    height: 200,
+                    child: Image.file(File(newUserModel.listOfCardsProvider[newUserModel.listOfCardsProvider.length-1])),
+                  ),
+                  Container(
+                    child: Text(newUserModel.listOfCardsProvider[newUserModel.listOfCardsProvider.length-3]),
+                  ),
+                  Container(
+                    child: Text(newUserModel.listOfCardsProvider[newUserModel.listOfCardsProvider.length-2]),
+                  )
+                ],
+              ),
+            );
             // Card(
             //   child: Column(
             //     children: [
@@ -111,7 +129,10 @@ class _HomeScreenState extends State<HomeScreen> {
         leading: IconButton(
           onPressed: () {
             // print(listOfCard[0].nameModel);
-            print(listOfCard[0].photoURLModel);
+            print(newUserModel.listOfCardsProvider);
+            print(newUserModel.listOfCardsProvider[0][0]);
+            print(newUserModel.listOfCardsProvider[1][0]);
+            print(newUserModel.listOfCardsProvider[2][0]);
           },
           icon: Icon(Icons.search_rounded),
         ),
@@ -121,7 +142,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Center(
           child: IndexedStack(
             index: _selectedIndex,
-            children: _cards,
+            children: cards,
           ),
           //_cards.elementAt(_selectedIndex),
         ),

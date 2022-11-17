@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-import '../model/User.dart';
+import '../provider/list_provider.dart';
 
 class AddPeopleBirthday extends StatefulWidget {
   const AddPeopleBirthday({Key? key}) : super(key: key);
@@ -23,14 +23,17 @@ class _AddPeopleBirthdayState extends State<AddPeopleBirthday> {
 
   final _formKey = GlobalKey<FormState>();
 
-  UserModel newUser = UserModel();
+  late String newName;
+  late String newData;
+  late String newPhotoURL;
+
 
   void _pickImage() async {
     final XFile? file = await _picker.pickImage(source: ImageSource.gallery);
 
     setState(() {
       _image = File(file!.path);
-      newUser.photoURLModel = file.path;
+      newPhotoURL = file.path;
     });
     // if (mounted && file != null) {
     //   Navigator.push(
@@ -80,7 +83,7 @@ class _AddPeopleBirthdayState extends State<AddPeopleBirthday> {
           IconButton(
             onPressed: () {
               _formKey.currentState?.save(); // null check
-              Provider.of<UserModel>(context, listen: false).updateModel(newUser.nameModel, newUser.dataModel, newUser.photoURLModel);
+              Provider.of<ListProvider>(context, listen: false).addToListModel(newName, newData, newPhotoURL);
               // _formKey.currentState?.reset();
               Navigator.pop(context,
                   MaterialPageRoute(builder: (context) => const HomeScreen()));
@@ -111,7 +114,7 @@ class _AddPeopleBirthdayState extends State<AddPeopleBirthday> {
                           Icons.cancel,
                         ),
                       )),
-                  onSaved: (value) => newUser.nameModel = value!,
+                  onSaved: (value) => newName = value!,
                 ),
                 TextFormField(
                   controller: _dataController,
@@ -140,7 +143,7 @@ class _AddPeopleBirthdayState extends State<AddPeopleBirthday> {
                       });
                     }
                   },
-                  onSaved: (value) => newUser.dataModel = value!,
+                  onSaved: (value) => newData = value!,
                 ),
               ],
             ),
